@@ -214,6 +214,7 @@ class PosteriorEstimator(NeuralInference, ABC):
         discard_prior_samples: bool = False,
         retrain_from_scratch: bool = False,
         show_train_summary: bool = False,
+        log_fn: Optional[Callable] = None,
         dataloader_kwargs: Optional[dict] = None,
     ) -> nn.Module:
         r"""Return density estimator that approximates the distribution $p(\theta|x)$.
@@ -400,6 +401,11 @@ class PosteriorEstimator(NeuralInference, ABC):
             # Log validation log prob for every epoch.
             self._summary["validation_log_probs"].append(self._val_log_prob)
             self._summary["epoch_durations_sec"].append(time.time() - epoch_start_time)
+
+            if log_fn is not None: # Log (WandB style)
+                log_fn({'epoch_duration': self._summary['epoch_durations_sec'][-1],
+                        'training_log_probs': self._summary['training_log_probs'][-1],
+                        'validation_log_probs': self._summary['validation_log_probs'][-1]})
 
             self._maybe_show_progress(self._show_progress_bars, self.epoch)
 
