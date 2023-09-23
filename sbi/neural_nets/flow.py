@@ -10,6 +10,7 @@ from pyknos.nflows import distributions as distributions_
 from pyknos.nflows import flows, transforms
 from pyknos.nflows.nn import nets
 from torch import Tensor, nn, relu, tanh, tensor, uint8
+from torch.nn import init
 
 from sbi.utils.sbiutils import (
     standardizing_net,
@@ -271,6 +272,10 @@ def build_nsf(
                 apply_unconditional_transform=False,
             )
         ]
+        # Initialize weights/bias of the final layer of each residual block to zero (following Miles advice)
+        # for res_block in block[0].transform_net.blocks:
+        #     init.constant_(res_block.linear_layers[-1].weight, 0.0)
+        #     init.constant_(res_block.linear_layers[-1].bias, 0.0)
         # Add LU transform only for high D x. Permutation makes sense only for more than
         # one feature.
         if x_numel > 1:
